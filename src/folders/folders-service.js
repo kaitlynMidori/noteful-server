@@ -4,7 +4,7 @@ const FoldersService = {
         .select('*')
         .from('folders')
     },
-    getById(knex) {
+    getById(knex, id) {
         return knex
         .from('folders')
         .where( {id} )
