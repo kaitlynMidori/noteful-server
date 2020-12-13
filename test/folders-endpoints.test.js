@@ -62,7 +62,7 @@ describe('Folders endpoints', () => {
                 .insert(testFolders)
         })
         
-        it(`responds with 200`, () => {
+        it(`responds with 200 when getting a folder by id`, () => {
             const folderId = 2
             return supertest(app)
                 .get(`/api/folders/${folderId}`)
@@ -85,16 +85,16 @@ describe('Folders endpoints', () => {
                     expect(res.body).to.have.property('id')
                     expect(res.headers.location).to.eql(`/api/folders/${res.body.id}`)
                 })
-                // .then(response => {
-                //     supertest(app)
-                //         .get(`/api/folder/${response.body.id}`)
-                //         .expect(response.body)
-                // })
+                .then(response => {
+                    supertest(app)
+                        .get(`/api/folder/${response.body.id}`)
+                        .expect(response.body)
+                })
                 
         })
     })
 
-    describe(`DELETE /api/folders/:folder_id`, () => {
+    describe.only(`DELETE /api/folders/:folder_id`, () => {
         const testFolders = makeFoldersArray()
             
         beforeEach('insert folders', () => {
@@ -103,10 +103,18 @@ describe('Folders endpoints', () => {
                 .insert(testFolders)
         })
         
-        it(`Responds with 204`, () => {
+        it(`Responds with 204 and removes the folder`, () => {
+            const idToRemove = 2
+            const expectedFolders = testFolders.filter(folder => folder.id !== idToRemove )
             return supertest(app)
                 .delete('/api/folders/2')
                 .expect(204)
+                .then(() => {
+                    return supertest(app)
+                        .get(`/api/folders`)
+                        .expect(200, expectedFolders)
+
+                })
 
         })
     })
