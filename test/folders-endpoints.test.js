@@ -54,6 +54,7 @@ describe('Folders endpoints', () => {
         })
     })
     describe(`GET /api/folders/:folder_id`, () => {
+        
         const testFolders = makeFoldersArray()
             
         beforeEach('insert folders', () => {
@@ -70,6 +71,8 @@ describe('Folders endpoints', () => {
         })
     })
     describe(`POST /api/folders`, () => {
+        
+
         it(`responds with 201 when folder is added and returns new folder and id`, () => {
 
             const newFolder = {
@@ -94,7 +97,7 @@ describe('Folders endpoints', () => {
         })
     })
 
-    describe.only(`DELETE /api/folders/:folder_id`, () => {
+    describe(`DELETE /api/folders/:folder_id`, () => {
         const testFolders = makeFoldersArray()
             
         beforeEach('insert folders', () => {
@@ -102,6 +105,8 @@ describe('Folders endpoints', () => {
                 .into('folders')
                 .insert(testFolders)
         })
+        
+        
         
         it(`Responds with 204 and removes the folder`, () => {
             const idToRemove = 2
@@ -117,6 +122,42 @@ describe('Folders endpoints', () => {
                 })
 
         })
+    })
+
+    describe(`PATCH /api/folders/:folder_id`, () => {
+        const testFolders = makeFoldersArray()
+            
+        beforeEach('insert folders', () => {
+            return db                    
+                .into('folders')
+                .insert(testFolders)
+        })
+
+        
+
+        
+        it(`responds with 204 and updates the folder`, () => {
+            const idToUpdate = 2;
+            const updatedFolder = {
+                folder_name: 'updated folder name',
+            };
+
+            const expectedFolders = {
+                ...testFolders[idToUpdate - 1],
+                ...updatedFolder
+            }
+
+            return supertest(app)
+                .patch(`/api/folders/${idToUpdate}`)
+                .send(updatedFolder)
+                .expect(204)
+                .then( res => {
+                    return supertest(app)
+                    .get(`/api/folders/${idToUpdate}`)
+                    .expect(expectedFolders)
+                })
+        })
+
     })
 
 })

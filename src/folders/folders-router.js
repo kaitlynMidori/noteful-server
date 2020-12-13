@@ -21,7 +21,7 @@ foldersRouter
             })
             .catch(next)
     })
-    .post((req,res,next) => {
+    .post(bodyParser, (req,res,next) => {
         const { folder_name } = req.body;
 
         if(!folder_name) {
@@ -72,7 +72,22 @@ foldersRouter
             req.params.folder_id
         )
         .then( () => {
-            res.status(204).end()
+            return res.status(204).end()
+        })
+        .catch(next)
+    })
+    .patch(bodyParser, (req,res,next) => {
+        // return res.status(204).end()
+        const { folder_name } = req.body
+        const folderToUpdate = { folder_name }
+
+        FoldersService.updateFolder(
+            req.app.get('db'),
+            req.params.folder_id,
+            folderToUpdate
+        )
+        .then(numRowsAffected => {
+            return res.status(204).end()
         })
         .catch(next)
     })
