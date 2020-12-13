@@ -2,6 +2,7 @@ const express = require('express');
 const xss = require('xss');
 const path = require('path');
 const NotesServrice = require('./notes-service');
+const NotesService = require('./notes-service');
 
 const notesRouter = express.Router();
 const bodyParser = express.json();
@@ -16,7 +17,11 @@ const sanitizeNote = note => ({
 notesRouter
     .route('/')
     .get((req,res,next) => {
-
+        NotesService.getAllNotes(req.app.get('db'))
+            .then(notes => {
+                return res.json(notes.map(sanitizeNote))
+            })
+            .catch(next)
     })
     .post(bodyParser, (req,res,next) => {
         
