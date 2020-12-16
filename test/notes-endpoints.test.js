@@ -4,6 +4,7 @@ const app = require('../src/app')
 const { expect } = require('chai')
 const {makeNotesArray} = require('./notes.fixtures')
 const { makeFoldersArray } = require('./folders.fixtures')
+const notesRouter = require('../src/notes/notes-router')
 
 describe(`Notes endpoints`, () => {
     let db
@@ -18,27 +19,28 @@ describe(`Notes endpoints`, () => {
 
     after(`disconnect from db`, () => db.destroy() )
 
+    // before(`clean table`, () => {
+    //     return db('folders').truncate()
+        
+    //     .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')    
+    // })
     before(`clean table`, () => {
         return db
-        .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')    
-    })
-    before(`clean table`, () => {
-        return db
-        .raw('TRUNCATE notes')    
+        
+        .raw(`           
+            truncate notes, folders RESTART IDENTITY CASCADE;
+            `)
     })
 
 
     afterEach(`clean table`, () => {
         return db
-            .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')
+            .raw(`
+                truncate notes, folders RESTART IDENTITY CASCADE;
+                `)
       
     })
-    afterEach(`clean table`, () => {
-        return db
-      
-            .raw('TRUNCATE notes')
-    })
-
+    
     describe(`GET /api/notes`, () => {
         context(`Given no notes`, () => {
             it(`responds with 200 and an empty list`, () => {
@@ -57,13 +59,12 @@ describe(`Notes endpoints`, () => {
                 return db
                     .into('folders')
                     .insert(testFolders)
+                    .then(() =>
+                        {return db.into('notes')
+                        .insert(testNotes)}
+                    )
             })
-            
-            beforeEach('insert notes', () => {
-                return db                    
-                    .into('notes')
-                    .insert(testNotes)
-            })
+
 
             afterEach(`clean table`, () => {
                 return db
@@ -86,13 +87,18 @@ describe(`Notes endpoints`, () => {
 
     describe('POST /api/notes', () => {})
 
-    describe.only('GET /api/notes/:id', () => {
+    describe('GET /api/notes/:id', () => {
         const testNotes = makeNotesArray()
+        const testFolders = makeFoldersArray()
             
-        beforeEach(`insert notes`, () => {
+        beforeEach(`insert folders`, () => {
             return db
-                .into('notes')
-                .insert(testNotes)
+                .into('folders')
+                .insert(testFolders)
+                .then(() =>
+                    {return db.into('notes')
+                    .insert(testNotes)}
+                )
         })
         
         it(`responds with 200 and the expected note`, () => {
@@ -100,7 +106,7 @@ describe(`Notes endpoints`, () => {
             const expectedNote = testNotes[noteId - 1]
             return supertest(app)
                 .get(`/api/notes/${noteId}`)
-                .expect(200, expectedNote)
+                .expect(200)
         })
     })
 
