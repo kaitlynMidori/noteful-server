@@ -4,6 +4,7 @@ const app = require('../src/app')
 const { expect } = require('chai')
 const {makeNotesArray} = require('./notes.fixtures')
 const { makeFoldersArray } = require('./folders.fixtures')
+const faker = require('faker')
 const notesRouter = require('../src/notes/notes-router')
 
 describe(`Notes endpoints`, () => {
@@ -19,25 +20,15 @@ describe(`Notes endpoints`, () => {
 
     after(`disconnect from db`, () => db.destroy() )
 
-    // before(`clean table`, () => {
-    //     return db('folders').truncate()
-        
-    //     .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')    
-    // })
     before(`clean table`, () => {
         return db
-        
-        .raw(`           
-            truncate notes, folders RESTART IDENTITY CASCADE;
-            `)
+            .raw(`truncate notes, folders RESTART IDENTITY CASCADE;`)
     })
 
 
     afterEach(`clean table`, () => {
         return db
-            .raw(`
-                truncate notes, folders RESTART IDENTITY CASCADE;
-                `)
+            .raw(`truncate notes, folders RESTART IDENTITY CASCADE;`)
       
     })
     
@@ -85,7 +76,59 @@ describe(`Notes endpoints`, () => {
         })
     })
 
-    describe('POST /api/notes', () => {})
+    describe('POST /api/notes', () => {
+
+        // const testNotes = makeNotesArray()
+        const testFolders = makeFoldersArray()
+
+        beforeEach(`insert folders`, () => {
+            return db
+                .into('folders')
+                .insert(testFolders)
+                // .then(() =>
+                //     {return db.into('notes')
+                //     .insert(testNotes)}
+                // )
+        })
+
+        afterEach(`clean table`, () => {
+            return db
+                .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')
+          
+        })
+        
+
+        it(`responds with 201 when note is added
+        and returns new note with id`, () => { 
+
+            const newNote = {
+                    note_name: faker.lorem.words(),
+                    content: faker.lorem.paragraphs(1),
+                    folder_id: 2,
+            }
+
+            return supertest(app)
+                .post('/api/notes')
+                .send(newNote)
+                .expect(201)
+                //    .expect(res => {
+                //        expect(res.body.first_name).to.eql(newProfile.first_name)
+                //        expect(res.body.last_name).to.eql(newProfile.last_name)
+                //        expect(res.body.nickname).to.eql(newProfile.nickname)
+                //        expect(res.body.image_url).to.eql(newProfile.image_url)
+                //        expect(res.body.relationship_level).to.eql(newProfile.relationship_level)
+                //        expect(res.body.admirable_qualities).to.eql(newProfile.admirable_qualities)
+                //        expect(res.body.notes).to.eql(newProfile.notes)
+                //        expect(res.body).to.have.property('id')
+                //        expect(res.headers.location).to.eql(`/api/profiles/${res.body.id}`)
+                //    })
+                .then(response => {
+                    supertest(app)
+                        .get(`/api/notes/${response.body.id}`)
+                        .expect(response.body)
+                })   
+        })
+    })
 
     describe('GET /api/notes/:id', () => {
         const testNotes = makeNotesArray()

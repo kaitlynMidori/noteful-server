@@ -25,6 +25,42 @@ notesRouter
             .catch(next)
     })
     .post(bodyParser, (req,res,next) => {
+        // return res.send(201)
+        const { note_name, content, folder_id, modified  } = req.body;
+        let reqNoteKeys = { 
+            note_name: note_name,
+            content: content,
+            folder_id: folder_id
+        };
+        
+        let optionalNoteKeys = { modified: modified };
+        
+        
+        for (const [key, value] of Object.entries(reqNoteKeys)) {
+            if(value == null) {
+                return res.status(400).json({
+                error: { message: `Missing ${key} in request body` }
+                });
+            }
+        }
+
+        let newNote = {
+            ...reqNoteKeys,
+            ...optionalNoteKeys
+        };
+
+
+        NotesService.addNote(
+            req.app.get('db'),
+            newNote
+        )
+        .then(note => {
+            return res
+                .status(201)
+                .location(path.posix.join (req.originalUrl, `/${note.id}`))
+                .json(sanitizeNote(note));
+        })
+        .catch(next)
         
     })
 
