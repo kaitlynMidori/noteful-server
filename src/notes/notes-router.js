@@ -25,7 +25,7 @@ notesRouter
             .catch(next)
     })
     .post(bodyParser, (req,res,next) => {
-        // return res.send(201)
+        
         const { note_name, content, folder_id, modified  } = req.body;
         let reqNoteKeys = { 
             note_name: note_name,
@@ -84,10 +84,40 @@ notesRouter
         res.json(sanitizeNote(res.note))
     })
     .patch(bodyParser, (req,res,next) => {
+        const { note_name, content, folder_id, modified  } = req.body;
         
+        let reqNoteKeys = { 
+            note_name: note_name,
+            content: content,
+            folder_id: folder_id
+        };
+        
+        let optionalNoteKeys = { modified: modified };
+        
+        let noteToUpdate = {
+            ...reqNoteKeys,
+            ...optionalNoteKeys
+        };
+
+        NotesService.updateNote(
+            req.app.get('db'),
+            req.params.note_id,
+            noteToUpdate
+        )
+        .then(numRowsAffected => {
+            return res.status(204).end()
+        })
+        .catch(next)        
     })
     .delete((req,res,next) => {
-        
+        NotesService.deleteNote(
+            req.app.get('db'),
+            req.params.note_id
+          )
+        .then(() => {
+            res.status(204).end();
+        })
+        .catch(next);        
     })
 
 module.exports = notesRouter;

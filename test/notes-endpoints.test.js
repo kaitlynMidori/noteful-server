@@ -60,13 +60,8 @@ describe(`Notes endpoints`, () => {
             afterEach(`clean table`, () => {
                 return db
                     .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')
-              
             })
-            afterEach(`clean table`, () => {
-                return db
-              
-                    .raw('TRUNCATE notes')
-            })
+           
             
             it(`responds wtih 200`, () => {
                 return supertest(app)
@@ -145,6 +140,88 @@ describe(`Notes endpoints`, () => {
     })
 
 
-    describe('PATCH /api/notes/:id', () => {})
-    describe('DELETE /api/notes/:id', () => {})
+    describe('PATCH /api/notes/:id', () => {
+        context(`Given there are notes in the database`, () => {
+            const testNotes = makeNotesArray()
+            const testFolders = makeFoldersArray()
+
+            beforeEach(`insert folders`, () => {
+                return db
+                    .into('folders')
+                    .insert(testFolders)
+                    .then(() =>
+                        {return db.into('notes')
+                        .insert(testNotes)}
+                    )
+            })
+
+
+            afterEach(`clean table`, () => {
+                return db
+                    .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')
+            })
+
+            it(`responds with 204 and updates the note`, () => {
+                const idToUpdate = 2;
+                const updatedNote = {                
+                    note_name: faker.lorem.words(),
+                    content: faker.lorem.paragraphs(1),
+                    folder_id: 3,
+                };
+
+                
+
+                const expectedNote = {
+                    ...testNotes[idToUpdate - 1],
+                    ...updatedNote
+                }
+
+                return supertest(app)
+                    .patch(`/api/notes/${idToUpdate}`)
+                    .send(updatedNote)
+                    .expect(204)
+                    .then( res => {
+                        return supertest(app)
+                        .get(`/api/notes/${idToUpdate}`)
+                        .expect(expectedNote)
+                })
+            })
+        })
+    })
+    describe('DELETE /api/notes/:id', () => {
+        context(`Given there are notes in the database`, () => {
+            const testNotes = makeNotesArray()
+            const testFolders = makeFoldersArray()
+
+            beforeEach(`insert folders`, () => {
+                return db
+                    .into('folders')
+                    .insert(testFolders)
+                    .then(() =>
+                        {return db.into('notes')
+                        .insert(testNotes)}
+                    )
+            })
+
+
+            afterEach(`clean table`, () => {
+                return db
+                    .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')
+            })
+
+            it(`Responds with 204 and removes the note`, () => {
+                const idToRemove = 2
+                const expectedNotes = testNotes.filter(note => note.id !== idToRemove )
+                return supertest(app)
+                    .delete(`/api/notes/${idToRemove}`)
+                    .expect(204)
+                    .then(() => {
+                        return supertest(app)
+                            .get(`/api/notes`)
+                            .expect(200, expectedNotes)
+
+                    })
+            })
+        })
+    })
 })
