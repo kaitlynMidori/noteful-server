@@ -4,6 +4,7 @@ const app = require('../src/app')
 const { expect } = require('chai')
 const {makeNotesArray} = require('./notes.fixtures')
 const { makeFoldersArray } = require('./folders.fixtures')
+const faker = require('faker')
 const notesRouter = require('../src/notes/notes-router')
 
 describe(`Notes endpoints`, () => {
@@ -19,25 +20,15 @@ describe(`Notes endpoints`, () => {
 
     after(`disconnect from db`, () => db.destroy() )
 
-    // before(`clean table`, () => {
-    //     return db('folders').truncate()
-        
-    //     .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')    
-    // })
     before(`clean table`, () => {
         return db
-        
-        .raw(`           
-            truncate notes, folders RESTART IDENTITY CASCADE;
-            `)
+            .raw(`truncate notes, folders RESTART IDENTITY CASCADE;`)
     })
 
 
     afterEach(`clean table`, () => {
         return db
-            .raw(`
-                truncate notes, folders RESTART IDENTITY CASCADE;
-                `)
+            .raw(`truncate notes, folders RESTART IDENTITY CASCADE;`)
       
     })
     
@@ -85,7 +76,49 @@ describe(`Notes endpoints`, () => {
         })
     })
 
-    describe('POST /api/notes', () => {})
+    describe('POST /api/notes', () => {
+
+        
+        const testFolders = makeFoldersArray()
+
+        beforeEach(`insert folders`, () => {
+            return db
+                .into('folders')
+                .insert(testFolders)
+        })
+
+        afterEach(`clean table`, () => {
+            return db
+                .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')
+        })
+
+        it(`responds with 201 when note is added
+        and returns new note with id`, () => { 
+
+            const newNote = {
+                    note_name: faker.lorem.words(),
+                    content: faker.lorem.paragraphs(1),
+                    folder_id: 2,
+            }
+
+            return supertest(app)
+                .post('/api/notes')
+                .send(newNote)
+                .expect(201)
+                   .expect(res => {
+                       expect(res.body.note_name).to.eql(newNote.note_name)
+                       expect(res.body.content).to.eql(newNote.content)
+                       expect(res.body.folder_id).to.eql(newNote.folder_id)
+                       expect(res.body).to.have.property('id')
+                       expect(res.headers.location).to.eql(`/api/notes/${res.body.id}`)
+                   })
+                .then(response => {
+                    supertest(app)
+                        .get(`/api/notes/${response.body.id}`)
+                        .expect(response.body)
+                })   
+        })
+    })
 
     describe('GET /api/notes/:id', () => {
         const testNotes = makeNotesArray()
