@@ -101,12 +101,13 @@ describe(`Notes endpoints`, () => {
                 )
         })
         
-        it(`responds with 200 and the expected note`, () => {
+        it(`responds with 200 and the expected note`, function() {
+            this.retries(3)
             const noteId = 2
             const expectedNote = testNotes[noteId - 1]
             return supertest(app)
                 .get(`/api/notes/${noteId}`)
-                .expect(200)
+                .expect(200, expectedNote)
         })
     })
 

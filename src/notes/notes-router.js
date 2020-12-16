@@ -11,7 +11,8 @@ const sanitizeNote = note => ({
     id: note.id,
     note_name: xss(note.note_name),
     content: xss(note.content),
-    folder_id: note.folder_id
+    folder_id: note.folder_id,
+    modified: note.modified
 });
 
 notesRouter
@@ -44,7 +45,7 @@ notesRouter
             .catch(next)
     })
     .get((req,res,next) => {
-
+        res.json(sanitizeNote(res.note))
     })
     .patch(bodyParser, (req,res,next) => {
         
