@@ -33,6 +33,11 @@ app.get('/', (req, res) => {
 //   res.status(500).json(response);
 // });
 
-app.use((error, req, res, next) => {console.error(error); res.status(500).json({error: {message: "Internal server error"}})})
+app.use((error, req, res, next) => {
+  console.error(error); 
+  res.status(500).json({
+    error: {message: "Internal server error"}
+  })
+})
 
 module.exports = app;

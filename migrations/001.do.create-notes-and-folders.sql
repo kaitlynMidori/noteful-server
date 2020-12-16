@@ -1,6 +1,3 @@
-    -- ALTER TABLE IF EXISTS notes
-    --     DROP COLUMN folder_id;
-
     DROP TABLE IF EXISTS notes;
    	DROP TABLE IF EXISTS folders;
 
@@ -15,11 +12,5 @@
         content TEXT NOT NULL,
         modified TIMESTAMPTZ DEFAULT now(),
         folder_id INTEGER REFERENCES folders(id) ON DELETE CASCADE ON UPDATE cascade
-    );
-    
-  
-  
---   alter table notes 
---   	add column folder_id INTEGER REFERENCES folders(id) ON DELETE CASCADE ON UPDATE cascade;
-   
+    );   
   
