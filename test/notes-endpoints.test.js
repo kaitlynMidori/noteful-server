@@ -78,25 +78,19 @@ describe(`Notes endpoints`, () => {
 
     describe('POST /api/notes', () => {
 
-        // const testNotes = makeNotesArray()
+        
         const testFolders = makeFoldersArray()
 
         beforeEach(`insert folders`, () => {
             return db
                 .into('folders')
                 .insert(testFolders)
-                // .then(() =>
-                //     {return db.into('notes')
-                //     .insert(testNotes)}
-                // )
         })
 
         afterEach(`clean table`, () => {
             return db
                 .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')
-          
         })
-        
 
         it(`responds with 201 when note is added
         and returns new note with id`, () => { 
@@ -111,17 +105,13 @@ describe(`Notes endpoints`, () => {
                 .post('/api/notes')
                 .send(newNote)
                 .expect(201)
-                //    .expect(res => {
-                //        expect(res.body.first_name).to.eql(newProfile.first_name)
-                //        expect(res.body.last_name).to.eql(newProfile.last_name)
-                //        expect(res.body.nickname).to.eql(newProfile.nickname)
-                //        expect(res.body.image_url).to.eql(newProfile.image_url)
-                //        expect(res.body.relationship_level).to.eql(newProfile.relationship_level)
-                //        expect(res.body.admirable_qualities).to.eql(newProfile.admirable_qualities)
-                //        expect(res.body.notes).to.eql(newProfile.notes)
-                //        expect(res.body).to.have.property('id')
-                //        expect(res.headers.location).to.eql(`/api/profiles/${res.body.id}`)
-                //    })
+                   .expect(res => {
+                       expect(res.body.note_name).to.eql(newNote.note_name)
+                       expect(res.body.content).to.eql(newNote.content)
+                       expect(res.body.folder_id).to.eql(newNote.folder_id)
+                       expect(res.body).to.have.property('id')
+                       expect(res.headers.location).to.eql(`/api/notes/${res.body.id}`)
+                   })
                 .then(response => {
                     supertest(app)
                         .get(`/api/notes/${response.body.id}`)
