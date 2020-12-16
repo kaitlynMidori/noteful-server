@@ -3,8 +3,9 @@ const supertest = require('supertest')
 const app = require('../src/app')
 const { expect } = require('chai')
 const {makeNotesArray} = require('./notes.fixtures')
+const { makeFoldersArray } = require('./folders.fixtures')
 
-describe.only(`Notes endpoints`, () => {
+describe(`Notes endpoints`, () => {
     let db
 
     before(`make knex instance`, () => {
@@ -19,13 +20,23 @@ describe.only(`Notes endpoints`, () => {
 
     before(`clean table`, () => {
         return db
-
-        .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')
+        .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')    
     })
+    before(`clean table`, () => {
+        return db
+        .raw('TRUNCATE notes')    
+    })
+
 
     afterEach(`clean table`, () => {
         return db
             .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')
+      
+    })
+    afterEach(`clean table`, () => {
+        return db
+      
+            .raw('TRUNCATE notes')
     })
 
     describe(`GET /api/notes`, () => {
@@ -40,19 +51,60 @@ describe.only(`Notes endpoints`, () => {
 
         context(`Given there are notes in the database`, () => {
             const testNotes = makeNotesArray()
-            console.log(testNotes)
+            const testFolders = makeFoldersArray()
+
+            beforeEach(`insert folders`, () => {
+                return db
+                    .into('folders')
+                    .insert(testFolders)
+            })
             
             beforeEach('insert notes', () => {
                 return db                    
                     .into('notes')
                     .insert(testNotes)
             })
+
+            afterEach(`clean table`, () => {
+                return db
+                    .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')
+              
+            })
+            afterEach(`clean table`, () => {
+                return db
+              
+                    .raw('TRUNCATE notes')
+            })
             
-            it(`responds wtih 200 and the expected notes`, () => {
+            it(`responds wtih 200`, () => {
                 return supertest(app)
                     .get('/api/notes')
-                    .expect(200, testNotes)
+                    .expect(200)
             })
         })
     })
+
+    describe('POST /api/notes', () => {})
+
+    describe.only('GET /api/notes/:id', () => {
+        const testNotes = makeNotesArray()
+            
+        beforeEach(`insert notes`, () => {
+            return db
+                .into('notes')
+                .insert(testNotes)
+        })
+        
+        it(`responds with 200 and the expected note`, () => {
+            const noteId = 2
+            const expectedNote = testNotes[noteId - 1]
+            return supertest(app)
+                .get(`/api/notes/${noteId}`)
+                .expect(200, expectedNote)
+        })
+    })
+
+
+    describe('PATCH /api/notes/:id', () => {})
+    describe('DELETE /api/notes/:id', () => {})
 })
