@@ -188,5 +188,40 @@ describe(`Notes endpoints`, () => {
             })
         })
     })
-    describe('DELETE /api/notes/:id', () => {})
+    describe('DELETE /api/notes/:id', () => {
+        context(`Given there are notes in the database`, () => {
+            const testNotes = makeNotesArray()
+            const testFolders = makeFoldersArray()
+
+            beforeEach(`insert folders`, () => {
+                return db
+                    .into('folders')
+                    .insert(testFolders)
+                    .then(() =>
+                        {return db.into('notes')
+                        .insert(testNotes)}
+                    )
+            })
+
+
+            afterEach(`clean table`, () => {
+                return db
+                    .raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE')
+            })
+
+            it(`Responds with 204 and removes the note`, () => {
+                const idToRemove = 2
+                const expectedNotes = testNotes.filter(note => note.id !== idToRemove )
+                return supertest(app)
+                    .delete(`/api/notes/${idToRemove}`)
+                    .expect(204)
+                    .then(() => {
+                        return supertest(app)
+                            .get(`/api/notes`)
+                            .expect(200, expectedNotes)
+
+                    })
+            })
+        })
+    })
 })
