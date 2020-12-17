@@ -1,4 +1,9 @@
 # Noteful-Server
+RESTFul API
+
+## Technologies
+Express, PostgreSQL, Node
+
 
 ---
 
