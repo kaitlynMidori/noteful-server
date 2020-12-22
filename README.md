@@ -1,4 +1,10 @@
 # Noteful-Server
+RESTFul API providing CRUD functionality  
+[Live Link](https://zenmnky-noteful-server.herokuapp.com/)
+
+## Technologies
+Express, PostgreSQL, Node
+
 
 ---
 
