@@ -2,14 +2,14 @@ module.exports = {
   PORT: process.env.PORT || 8000,
   NODE_ENV: process.env.NODE_ENV || "development",
   
-    // "development": {
-    //   "username": "tomkadwill",
-    //   "password": "password",
-    //   "database": "urlshortener_development",
-    //   "host": "localhost",
-    //   "dialect": "postgres",
-    //   "operatorsAliases": false
-    // },
+    "development": {
+      "username": "tomkadwill",
+      "password": "password",
+      "database": "urlshortener_development",
+      "host": "localhost",
+      "dialect": "postgres",
+      "operatorsAliases": false
+    },
   
   
   DATABASE_URL: process.env.DATABASE_URL + (process.env.NODE_ENV === 'production' ? '?ssl=true' : '') || 'postgresql://postgres@localhost/noteful',

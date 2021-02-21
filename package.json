@@ -30,8 +30,8 @@
     "morgan": "^1.10.0",
     "npm-registry-fetch": "^9.0.0",
     "pg": "^8.5.1",
-    "postgrator": "^3.11.1",
-    "postgrator-cli": "^3.2.0",
+    "postgrator": "^4.1.1",
+    "postgrator-cli": "^4.0.0",
     "winston": "^3.3.3",
     "xss": "^1.0.8"
   },
