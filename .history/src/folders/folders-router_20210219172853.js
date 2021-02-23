@@ -1,10 +1,10 @@
-const path = require('path')
-const express = require('express')
-const xss = require('xss')
-const FoldersService = require('./folders-service')
+const express = require('express');
+const xss = require('xss');
+const path = require('path');
+const FoldersService = require('./folders-service');
 // const { logger } = require('winston');
 
-const foldersRouter = express.Router()
+const foldersRouter = express.Router();
 const bodyParser = express.json();
 
 const sanitizeFolder = folder => ({

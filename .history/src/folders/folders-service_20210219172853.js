@@ -6,9 +6,8 @@ const FoldersService = {
     },
     getById(knex, id) {
         return knex
-        .select('*')
         .from('folders')
-        .where( 'id', id )
+        .where( {id} )
         .first()
     },
     addFolder(knex, newFolder) {
@@ -34,4 +33,4 @@ const FoldersService = {
     }
 }
 
-module.exports = FoldersService
+module.exports = FoldersService;
